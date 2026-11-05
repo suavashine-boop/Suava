@@ -35,6 +35,7 @@
         <button onclick="mineBlock()">⛏️ Mine Block</button>
         
         <br><br>
+        <input type="password" id="founder_key" placeholder="Enter Secret Founder Key">
         <button onclick="claimFounder()" style="background: #f1c40f; color: black; font-weight: bold;">👑 Claim Founder's 2M SVA</button>
         
         <p id="status" style="margin-top: 20px; color: #00ffcc; font-weight: bold;"></p>
@@ -83,10 +84,19 @@
         }
 
         async function claimFounder() {
-            const res = await fetch('/founder_claim', { method: 'POST' });
+            const key = document.getElementById('founder_key').value;
+            if(!key) return alert("You need the secret Founder key!");
+
+            const res = await fetch('/founder_claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ secret_key: key })
+            });
             const data = await res.json();
             document.getElementById('status').innerText = data.message;
-            setTimeout(() => location.reload(), 1500);
+            if(data.message.includes("claimed")) {
+                setTimeout(() => location.reload(), 1500);
+            }
         }
     </script>
 </body>
