@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Suava Dashboard</title>
+    <style>
+        body { font-family: Arial; background: #1a1a2e; color: white; text-align: center; padding-top: 50px; }
+        .card { background: #16213e; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 400px; }
+        h1 { color: #e94560; margin-bottom: 5px;}
+        .balance { font-size: 40px; font-weight: bold; margin: 20px 0; color: #0f3460; background: #fff; padding: 10px 20px; border-radius: 10px; }
+        input { padding: 10px; margin: 5px; border-radius: 5px; border: none; width: 90%; }
+        button { padding: 10px 20px; background: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #ff2e63; }
+        .address { font-size: 12px; color: #888; word-wrap: break-word; cursor: pointer; }
+        .address:hover { color: #00ffcc; }
+        .history-box { background: #0f3460; border-radius: 10px; padding: 10px; margin-top: 20px; max-height: 150px; overflow-y: auto; text-align: left; font-size: 14px; }
+        .history-item { border-bottom: 1px solid #333; padding: 5px 0; }
+        .logout { background: #555; font-size: 12px; padding: 5px 10px; text-decoration: none; color: white; border-radius: 5px; float: right; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <a href="/logout" class="logout">Logout</a>
+        <h1>Welcome, {{ username }}!</h1>
+        <p class="address" onclick="copyAddress()" title="Click to copy">Address: <span id="myAddress">{{ address }}</span> 📋</p>
+        
+        <div class="balance">{{ balance }} SVA</div>
+        
+        <hr style="border-color: #333;">
+        
+        <h3>Send Suava</h3>
+        <input type="text" id="receiver" placeholder="Receiver's Public Address">
+        <input type="number" id="amount" placeholder="Amount (SVA)">
+        <br>
+        <button onclick="sendCoins()">Send</button>
+        <button onclick="mineBlock()">⛏️ Mine Block</button>
+        
+        <br><br>
+        <button onclick="claimFounder()" style="background: #f1c40f; color: black; font-weight: bold;">👑 Claim Founder's 2M SVA</button>
+        
+        <p id="status" style="margin-top: 20px; color: #00ffcc; font-weight: bold;"></p>
+
+        <h3>History</h3>
+        <div class="history-box">
+            {% if history %}
+                {% for item in history %}
+                    <div class="history-item">{{ item }}</div>
+                {% endfor %}
+            {% else %}
+                <div class="history-item">No transactions yet.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function copyAddress() {
+            navigator.clipboard.writeText(document.getElementById('myAddress').innerText);
+            document.getElementById('status').innerText = "Address copied!";
+            setTimeout(() => document.getElementById('status').innerText = "", 2000);
+        }
+
+        async function mineBlock() {
+            const res = await fetch('/mine', { method: 'POST' });
+            const data = await res.json();
+            document.getElementById('status').innerText = data.message;
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        async function sendCoins() {
+            const receiver = document.getElementById('receiver').value;
+            const amount = document.getElementById('amount').value;
+            if(!receiver || !amount) return alert("Enter address and amount");
+            
+            const res = await fetch('/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receiver: receiver, amount: amount })
+            });
+            const data = await res.json();
+            document.getElementById('status').innerText = data.message;
+            if(data.message.includes("Sent")) {
+                setTimeout(() => location.reload(), 1500);
+            }
+        }
+
+        async function claimFounder() {
+            const res = await fetch('/founder_claim', { method: 'POST' });
+            const data = await res.json();
+            document.getElementById('status').innerText = data.message;
+            setTimeout(() => location.reload(), 1500);
+        }
+    </script>
+</body>
+</html>

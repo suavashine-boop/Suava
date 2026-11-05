@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Suava Login</title>
+    <style>
+        body { font-family: Arial; background: #1a1a2e; color: white; text-align: center; padding-top: 50px; }
+        .card { background: #16213e; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 300px; }
+        h1 { color: #e94560; }
+        input { padding: 10px; margin: 10px 0; border-radius: 5px; border: none; width: 90%; }
+        button { padding: 10px 20px; background: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        button:hover { background: #ff2e63; }
+        #message { margin-top: 15px; color: #00ffcc; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Suava Wallet</h1>
+        <h3>Create Account / Login</h3>
+        
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        
+        <button onclick="register()">Create Account</button>
+        <button onclick="login()">Login</button>
+        
+        <p id="message"></p>
+    </div>
+
+    <script>
+        async function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if(!username || !password) return alert("Enter username and password");
+            
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            document.getElementById('message').innerText = data.message;
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if(!username || !password) return alert("Enter username and password");
+            
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            document.getElementById('message').innerText = data.message;
+            
+            // If login is successful, go to dashboard!
+            if(data.message.includes("successful")) {
+                window.location.href = '/dashboard';
+            }
+        }
+    </script>
+</body>
+</html>
